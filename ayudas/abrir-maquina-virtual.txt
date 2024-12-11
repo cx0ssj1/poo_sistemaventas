@@ -1,0 +1,7 @@
+abrir maquina virtual:
+
+    python -m venv env
+
+activar maquina virtual:
+
+    env\scripts\activate

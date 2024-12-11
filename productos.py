@@ -27,16 +27,18 @@ class Productos:
         self.cuadernos = []
         self.varios = []
     def agregar_lapices(self, nombre, precio):
-        lapices = Lapices(nombre, precio)
-        self.lapices.append(Lapices)
-        return lapices
+        lapiz = Lapices(nombre, precio)
+        self.lapices.append(lapiz)  # Aquí agregamos la instancia
+        return lapiz
+
     def agregar_cuadernos(self, nombre, precio):
-        cuadernos = Cuadernos(nombre, precio)
-        self.cuadernos.append(Cuadernos)
-        return cuadernos
+        cuaderno = Cuadernos(nombre, precio)
+        self.cuadernos.append(cuaderno)  # Aquí agregamos la instancia
+        return cuaderno
+
     def agregar_varios(self, nombre, precio):
         varios = Varios(nombre, precio)
-        self.varios.append(Varios)
+        self.varios.append(varios)  # Aquí agregamos la instancia
         return varios
     def eliminar_item(self, tipo, nombre):
         if tipo == "Lapices":
