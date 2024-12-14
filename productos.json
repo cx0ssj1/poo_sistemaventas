@@ -1,0 +1,17 @@
+[
+    {
+        "nombre": "Plumon permanente",
+        "precio": 1200.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Lapiz de pasta BIC",
+        "precio": 1000.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Cuaderno Personalizado",
+        "precio": 12000.0,
+        "tipo": "Cuadernos"
+    }
+]
