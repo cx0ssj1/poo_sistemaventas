@@ -1,17 +1,87 @@
 [
     {
-        "nombre": "Plumon permanente",
+        "nombre": "L\u00e1piz HB",
+        "precio": 500.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Marcadores",
         "precio": 1200.0,
         "tipo": "Lapices"
     },
     {
-        "nombre": "Lapiz de pasta BIC",
-        "precio": 1000.0,
+        "nombre": "Lapiz de color",
+        "precio": 800.0,
         "tipo": "Lapices"
     },
     {
-        "nombre": "Cuaderno Personalizado",
-        "precio": 12000.0,
+        "nombre": "Bol\u00edgrafo azul",
+        "precio": 400.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Marcador permanente",
+        "precio": 1200.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Lapiz 2B",
+        "precio": 600.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Lapiz de grafito",
+        "precio": 700.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Lapiz de colores 12 unidades",
+        "precio": 2500.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Lapiz de cera",
+        "precio": 800.0,
+        "tipo": "Lapices"
+    },
+    {
+        "nombre": "Cuaderno de hojas sueltas",
+        "precio": 1200.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de anillas",
+        "precio": 1800.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de notas A5",
+        "precio": 1000.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de bocetos",
+        "precio": 1300.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de ejercicios",
+        "precio": 1100.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de caligraf\u00eda",
+        "precio": 1400.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de historia",
+        "precio": 1300.0,
+        "tipo": "Cuadernos"
+    },
+    {
+        "nombre": "Cuaderno de ciencias",
+        "precio": 1100.0,
         "tipo": "Cuadernos"
     }
 ]

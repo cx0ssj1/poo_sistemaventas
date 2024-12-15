@@ -6,6 +6,7 @@ import datetime
 import pandas as pd
 from fpdf import FPDF
 import json
+import os
 
 
 class TiendaGUI:
@@ -17,7 +18,14 @@ class TiendaGUI:
         self.lista_productos = []
         self.ventas_diarias = []
         self.total_parcial_text = ft.Text("Total parcial: CLP $0")
+        self.tipos_productos = []  # Inicializar aquí
+        self.cargar_tipos_productos()  # Cargar tipos de productos al iniciar
         self.cargar_productos_agregados()
+        self.nuevo_tipo_input = ft.TextField(label="Nuevo Tipo de Producto")
+        self.tipo_selector_eliminar = ft.Dropdown(
+            label="Seleccionar Tipo para Eliminar",
+            options=self.generar_lista_tipos()
+        )
 
     def main(self, page: ft.Page):
         page.title = "Sistema de Ventas para Tienda"
@@ -80,16 +88,11 @@ class TiendaGUI:
             options=self.generar_lista_productos(),
             on_change=self.cargar_datos_producto  # Cargar datos al seleccionar
         )
-
         self.nombre_input_editar = ft.TextField(label="Nuevo Nombre")
         self.precio_input_editar = ft.TextField(label="Nuevo Precio")
         self.tipo_input_editar = ft.Dropdown(
             label="Nuevo Tipo de Producto",
-            options=[
-                ft.dropdown.Option("Lapices"),
-                ft.dropdown.Option("Cuadernos"),
-                ft.dropdown.Option("Varios")
-            ]
+            options=self.generar_lista_tipos()  # Cargar tipos al iniciar
         )
         editar_btn = ft.ElevatedButton("Editar Producto", on_click=self.editar_producto)
 
@@ -105,11 +108,32 @@ class TiendaGUI:
         editar_area = ft.Column(
             [
                 ft.Text("Editar Productos", size=16, weight=ft.FontWeight.BOLD),
-                self.producto_selector_editar,  # Nuevo input para seleccionar producto
+                self.producto_selector_editar,
                 self.nombre_input_editar,
                 self.precio_input_editar,
-                self.tipo_input_editar,
+                self.tipo_input_editar,  # Aquí se carga la lista de tipos
                 editar_btn,
+            ],
+            spacing=10
+        )
+
+        # Área para agregar y eliminar tipos de productos
+        agregar_tipo_btn = ft.ElevatedButton(
+            "Agregar Tipo de Producto",
+            on_click=self.agregar_tipo_producto
+        )
+        eliminar_tipo_btn = ft.ElevatedButton(
+            "Eliminar Tipo de Producto",
+            on_click=self.eliminar_tipo_producto
+        )
+
+        tipos_area = ft.Column(
+            [
+                ft.Text("Gestión de Tipos de Productos", size=16, weight=ft.FontWeight.BOLD),
+                self.nuevo_tipo_input,
+                agregar_tipo_btn,
+                self.tipo_selector_eliminar,
+                eliminar_tipo_btn,
             ],
             spacing=10
         )
@@ -122,7 +146,8 @@ class TiendaGUI:
                     ft.Row(
                         [
                             editar_area,   # Área de editar a la izquierda
-                            eliminar_area  # Área de eliminar a la derecha
+                            tipos_area,    # Área de gestión de tipos en el centro
+                            eliminar_area   # Área de eliminar a la derecha
                         ],
                         spacing=50,
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN
@@ -159,11 +184,8 @@ class TiendaGUI:
         self.precio_input = ft.TextField(label="Precio del Producto")
         self.tipo_input = ft.Dropdown(
             label="Tipo de Producto",
-            options=[
-                ft.dropdown.Option("Lapices"),
-                ft.dropdown.Option("Cuadernos"),
-                ft.dropdown.Option("Varios")
-            ]
+            options=self.generar_lista_tipos() 
+
         )
         agregar_btn = ft.ElevatedButton("Agregar Producto", on_click=self.agregar_producto)
         return ft.Column([
@@ -172,6 +194,7 @@ class TiendaGUI:
             self.tipo_input,
             agregar_btn
         ])
+        
 
     def agregar_producto(self, e):
         nombre = self.nombre_input.value
@@ -218,15 +241,15 @@ class TiendaGUI:
             self.mostrar_mensaje("El producto no se pudo encontrar para eliminar.")
 
     def editar_producto(self, e):
-        producto_info = self.producto_selector_admin.value
+        producto_info = self.producto_selector_editar.value
         if not producto_info:
             self.mostrar_mensaje("Por favor seleccione un producto para editar.")
             return
 
         nombre_producto = producto_info.split(" (")[0]
         producto = self.tienda.productos.obtener_item("Lapices", nombre_producto) or \
-                self.tienda.productos.obtener_item("Cuadernos", nombre_producto) or \
-                self.tienda.productos.obtener_item("Varios", nombre_producto)
+                    self.tienda.productos.obtener_item("Cuadernos", nombre_producto) or \
+                    self.tienda.productos.obtener_item("Varios", nombre_producto)
 
         if not producto:
             self.mostrar_mensaje("El producto no se encontró para editar.")
@@ -281,7 +304,7 @@ class TiendaGUI:
                         self.tienda.productos.agregar_varios(nombre, precio)
         except FileNotFoundError:
             pass  # Si no existe el archivo, no se hace nada
-
+        
     def crear_vista_ventas(self):
         self.lista_ventas = []  # Lista para almacenar productos vendidos
         return ft.Container(
@@ -388,8 +411,8 @@ class TiendaGUI:
         # Generar voucher en PDF
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt=f"Voucher de Venta", ln=True, align='C')
+        pdf.set_font("Courier", size=12)
+        pdf.cell(200, 10, txt=f"BOLETA EXENTA ELECTRONICA", ln=True, align='C')
         pdf.cell(200, 10, txt=f"Productos Vendidos:", ln=True)
         for item in self.lista_ventas:
             producto = item['producto']
@@ -422,10 +445,15 @@ class TiendaGUI:
             for sublist in [self.tienda.productos.lapices, self.tienda.productos.cuadernos, self.tienda.productos.varios]
             for item in sublist
         ]
-
+    
+    #listaa
     def actualizar_lista_productos(self):
         self.producto_selector.options = self.generar_lista_productos()
+        self.producto_selector_editar.options = self.generar_lista_productos()
+        self.producto_selector_admin.options = self.generar_lista_productos()
         self.producto_selector.update()
+        self.producto_selector_editar.update()
+        self.producto_selector_admin.update()
 
     def actualizar_precio(self, e):
         producto_info = e.control.value
@@ -450,6 +478,52 @@ class TiendaGUI:
         fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d')
         archivo_excel = f"ventas_diarias_{fecha_actual}.xlsx"
         df.to_excel(archivo_excel, index=False)
+
+    def agregar_tipo_producto(self, e):
+        nuevo_tipo = self.nuevo_tipo_input.value
+        if nuevo_tipo and nuevo_tipo not in self.tipos_productos:
+            self.tipos_productos.append(nuevo_tipo)  # Agregar nuevo tipo a la lista
+            self.mostrar_mensaje(f"Tipo de producto '{nuevo_tipo}' agregado exitosamente.")
+            self.nuevo_tipo_input.value = ""
+            self.guardar_tipos_productos()  # Guardar tipos de productos
+            self.actualizar_lista_tipos()
+            self.page.update()
+        else:
+            self.mostrar_mensaje("Por favor ingrese un tipo de producto válido o que no exista.")
+
+    def eliminar_tipo_producto(self, e):
+        tipo_a_eliminar = self.tipo_selector_eliminar.value
+        if tipo_a_eliminar in self.tipos_productos:
+            self.tipos_productos.remove(tipo_a_eliminar)  # Eliminar tipo de la lista
+            self.mostrar_mensaje(f"Tipo de producto '{tipo_a_eliminar}' eliminado exitosamente.")
+            self.guardar_tipos_productos()  # Guardar tipos de productos
+            self.actualizar_lista_tipos()
+            self.page.update()
+        else:
+            self.mostrar_mensaje("Por favor seleccione un tipo de producto válido para eliminar.")
+
+    def generar_lista_tipos(self):
+        return [ft.dropdown.Option(tipo) for tipo in self.tipos_productos]  # Devolver la lista actualizada
+
+    def actualizar_lista_tipos(self):
+        self.tipo_selector_eliminar.options = self.generar_lista_tipos()
+        self.tipo_input_editar.options = self.generar_lista_tipos()
+        self.tipo_input.options = self.generar_lista_tipos()
+        self.tipo_input_editar.update()
+        self.tipo_input.update()
+        self.tipo_selector_eliminar.update()
+
+    def cargar_tipos_productos(self):
+        if os.path.exists("tipos_productos.json"):
+            with open("tipos_productos.json", "r", encoding="UTF-8") as archivo:
+                self.tipos_productos = json.load(archivo)
+        else:
+            # Si no existe el archivo, inicializar con tipos predeterminados
+            self.tipos_productos = ["Lapices", "Cuadernos", "Varios"]
+
+    def guardar_tipos_productos(self):
+        with open("tipos_productos.json", "w", encoding="UTF-8") as archivo:
+            json.dump(self.tipos_productos, archivo)
 
 def main():
     app = TiendaGUI()
