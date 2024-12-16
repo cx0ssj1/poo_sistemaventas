@@ -1,12 +1,12 @@
 import flet as ft
+import datetime
+import pandas as pd
+import json
+import os
 from tienda import Tienda
 from clientes import Cliente
 from pedidos import Pedido
-import datetime
-import pandas as pd
 from fpdf import FPDF
-import json
-import os
 
 
 class TiendaGUI:
@@ -26,6 +26,7 @@ class TiendaGUI:
             label="Seleccionar Tipo para Eliminar",
             options=self.generar_lista_tipos()
         )
+        self.contador_ventas = self.cargar_contador_ventas()  # Cargar contador de ventas
 
     def main(self, page: ft.Page):
         page.title = "Sistema de Ventas para Tienda"
@@ -34,7 +35,7 @@ class TiendaGUI:
         
         # Configuración del tamaño de la ventana
         page.window.width = 1200  # Ancho de la ventana en píxeles
-        page.window.height = 800  # Alto de la ventana en píxeles
+        page.window.height = 900  # Alto de la ventana en píxeles
         page.window.resizable = True  # Permitir redimensionar
         page.window.maximized = False  # No iniciar maximizada
         
@@ -407,27 +408,51 @@ class TiendaGUI:
             return
 
         total = sum(item['producto'].precio * item['cantidad'] for item in self.lista_ventas)
+            
+        # Cambiar el formato de fecha y hora
+        fecha_hora = datetime.datetime.now()
+        fecha_formateada = fecha_hora.strftime('%d-%m-%Y')  # Cambiar '/' por '-'
+        hora_formateada = fecha_hora.strftime('%H-%M-%S')   # Mantener '-' en la hora
         
         # Generar voucher en PDF
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Courier", size=12)
         pdf.cell(200, 10, txt=f"BOLETA EXENTA ELECTRONICA", ln=True, align='C')
-        pdf.cell(200, 10, txt=f"Productos Vendidos:", ln=True)
+        # Imprimir "Fecha:" y el dato de la fecha en la misma línea
+        pdf.cell(100, 10, txt="Fecha:", ln=False)  # Ancho para "Fecha:"
+        pdf.cell(0, 10, txt=fecha_hora.strftime('%d/%m/%Y'), ln=True, align='R')  # Alinear solo el dato a la derecha
+        # Imprimir "Hora:" y el dato de la hora en la misma línea
+        pdf.cell(100, 10, txt="Hora:", ln=False)  # Ancho para "Hora:"
+        pdf.cell(0, 10, txt=hora_formateada, ln=True, align='R')  # Alinear solo el dato a la derecha        
+        pdf.cell(100, 10, txt=f"Productos Vendidos:", ln=False)
         for item in self.lista_ventas:
             producto = item['producto']
             cantidad = item['cantidad']
-            pdf.cell(200, 10, txt=f"\t\t\t\t\t\t\t\t\t\t\t\t{producto.nombre} x{cantidad}: CLP ${producto.precio * cantidad:,.0f}", ln=True)
-        
-        pdf.cell(200, 10, txt=f"Total: CLP ${total:,.0f}", ln=True)
-        pdf.cell(200, 10, txt=f"Fecha y Hora: {datetime.datetime.now()}", ln=True)
-        pdf.output(f"voucher_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf")
+            pdf.cell(0, 10, txt=f"{producto.nombre} x{cantidad}: CLP ${producto.precio * cantidad:,.0f}", ln=True, align='R')
+        pdf.cell(200, 10, txt=f" ", ln=True, align='C')
+        pdf.cell(100, 10, txt=f"Total: ", ln=False)
+        pdf.cell(0, 10, txt=f"CLP ${total:,.0f}", ln=True, align='R')
+
+        # Generar número de venta
+        numero_venta = f"{self.contador_ventas:03d}"  # Formato 001, 002, etc.
+        self.contador_ventas += 1  # Incrementar contador
+        self.guardar_contador_ventas()  # Guardar el nuevo contador
+
+        # Agregar número de venta al PDF
+        pdf.cell(100, 10, txt=f"Número de Venta: ", ln=False)
+        pdf.cell(0, 10, txt=numero_venta, ln=True, align='R')
+
+        pdf.output(f"boleta_{fecha_formateada}_{hora_formateada}.pdf")
 
         # Guardar en ventas diarias
         self.ventas_diarias.append({
+            "numero_venta": numero_venta,  # Agregar el número de venta aquí
             "productos": [f"{item['producto'].nombre} x{item['cantidad']}" for item in self.lista_ventas],
             "total": total,
-            "fecha": datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            "fecha": fecha_formateada,
+            "Hora": hora_formateada
+            
         })
         
         # Limpiar la lista de ventas
@@ -437,7 +462,7 @@ class TiendaGUI:
         self.total_parcial_text.value = "Total: CLP $0"
         self.total_parcial_text.update()
         
-        self.mostrar_mensaje("Venta finalizada. Voucher generado.")
+        self.mostrar_mensaje("Venta finalizada. Boleta generada.")
 
     def generar_lista_productos(self):
         return [
@@ -474,10 +499,16 @@ class TiendaGUI:
         if not self.ventas_diarias:
             self.mostrar_mensaje("No hay ventas para guardar.")
             return
+        
         df = pd.DataFrame(self.ventas_diarias)
-        fecha_actual = datetime.datetime.now().strftime('%Y-%m-%d')
-        archivo_excel = f"ventas_diarias_{fecha_actual}.xlsx"
+        fecha = datetime.datetime.now()
+        fecha_formateada = fecha.strftime('%d-%m-%Y') 
+        archivo_excel = f"ventas_diarias_{fecha_formateada}.xlsx"
         df.to_excel(archivo_excel, index=False)
+
+        # Reiniciar el contador de ventas a 1
+        self.contador_ventas = 1
+        self.guardar_contador_ventas()  # Guardar el contador reiniciado
 
     def agregar_tipo_producto(self, e):
         nuevo_tipo = self.nuevo_tipo_input.value
@@ -524,6 +555,16 @@ class TiendaGUI:
     def guardar_tipos_productos(self):
         with open("tipos_productos.json", "w", encoding="UTF-8") as archivo:
             json.dump(self.tipos_productos, archivo)
+
+    def cargar_contador_ventas(self):
+        if os.path.exists("contador_ventas.txt"):
+            with open("contador_ventas.txt", "r") as archivo:
+                return int(archivo.read().strip())
+        return 1  # Iniciar en 1 si no existe el archivo
+
+    def guardar_contador_ventas(self):
+        with open("contador_ventas.txt", "w") as archivo:
+            archivo.write(str(self.contador_ventas))
 
 def main():
     app = TiendaGUI()

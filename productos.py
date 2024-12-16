@@ -30,6 +30,12 @@ class Productos:
         lapiz = Lapices(nombre, precio)
         self.lapices.append(lapiz)  # Aquí agregamos la instancia
         return lapiz
+    def buscar_por_codigo(self, codigo):
+        """Busca un producto por su código único."""
+        for item in self.lapices + self.cuadernos + self.varios:
+            if item.codigo == codigo:
+                return item
+        return None
 
     def agregar_cuadernos(self, nombre, precio):
         cuaderno = Cuadernos(nombre, precio)
