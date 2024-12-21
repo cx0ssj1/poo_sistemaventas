@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import os
 from flask_cors import CORS
 from tienda import Tienda  # Importa tu lógica existente
 
@@ -30,4 +31,5 @@ def buscar_producto():
 
 if __name__ == '__main__':
     # Ejecuta el servidor Flask
-    app.run(host='https://poo-sistemaventas.onrender.com', port=8080, debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Usa el puerto asignado o el 5000 por defecto
+    app.run(host='0.0.0.0', port=port, debug=True)
