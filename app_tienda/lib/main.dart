@@ -33,7 +33,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Map<String, dynamic>> _productos = []; // Lista de productos escaneados
+  List<Map<String, dynamic>> productos = []; // Lista de productos escaneados
   double _total = 0.0; // Total acumulado
 
   // Escanear un producto usando código de barras o QR
@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
         if (response.statusCode == 200) {
           final producto = jsonDecode(response.body);
           setState(() {
-            _productos.add(producto);
+            productos.add(producto);
             _total += producto['precio'];
           });
         } else {
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Finalizar la venta
   void finalizarVenta() {
     setState(() {
-      _productos.clear();
+      productos.clear();
       _total = 0.0;
     });
     mostrarMensaje('Venta finalizada.');
@@ -92,9 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _productos.length,
+              itemCount: productos.length,
               itemBuilder: (context, index) {
-                final producto = _productos[index];
+                final producto = productos[index];
                 return ListTile(
                   title: Text(producto['nombre']),
                   subtitle: Text('Precio: \$${producto['precio']}'),
