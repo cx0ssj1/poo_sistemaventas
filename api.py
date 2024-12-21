@@ -30,4 +30,4 @@ def buscar_producto():
 
 if __name__ == '__main__':
     # Ejecuta el servidor Flask
-    app.run(host='192.168.1.7', port=8080, debug=True)
+    app.run(host='https://poo-sistemaventas.onrender.com', port=8080, debug=True)
