@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (result.rawContent.isNotEmpty) {
         // Llama al backend para buscar el producto
         final response = await http.post(
-          Uri.parse('http://192.168.1.7:8080/api/buscar_producto'), // Reemplaza <TU_IP> con la IP de tu servidor
+          Uri.parse('https://poo-sistemaventas.onrender.com/api/buscar_producto'), // Reemplaza <TU_IP> con la IP de tu servidor
           body: jsonEncode({'codigo': result.rawContent}),
           headers: {'Content-Type': 'application/json'},
         );
